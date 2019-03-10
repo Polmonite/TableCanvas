@@ -1,0 +1,120 @@
+<!doctype HTML>
+<html>
+	<head>
+		<title>Table Canvas</title>
+		<style type="text/css">
+			body {
+				position: relative;
+				background: #2a3477;
+				background-image: radial-gradient(circle, #4d6a96, #3e588d, #324682, #2a3477, #262069);
+				text-align: center;
+			}
+			h1 {
+				font-family: Arial, sans-serif;
+				color: white;
+			}
+			canvas {
+				position: relative;
+				display: inline-block;
+				width: 600px;
+				height: 800px;
+				margin: auto;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>TABLE CANVAS</h1>
+		<canvas id="canvas"></canvas>
+		<script type="text/javascript">
+			// this just creates a data source with mocked data
+			var charsPool = 'abcdefghijklmnopqrstuvxywz'.split('');
+			function rand(min, max) {
+				return Math.floor(Math.random() * max) + min;
+			}
+
+			function randChar() {
+				return charsPool[rand(0, charsPool.length)];
+			}
+
+			function randString() {
+				var l = rand(5, 8);
+				var s = '';
+				for (var i = 0; i < l; ++i) {
+					s += randChar();
+				}
+				return randChar().toUpperCase() + s;
+			}
+
+			function randDate(start, end) {
+				var d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+				return ('00' + d.getDate()).substr(-2)
+					+ "-"
+					+ ('00' + (d.getMonth() + 1)).substr(-2)
+					+ "-"
+					+ d.getFullYear();
+			}
+
+			function doLine(ctx, from, to) {
+				ctx.moveTo(from.x, from.y);
+				ctx.lineTo(to.x, to.y);
+				ctx.stroke();
+			}
+
+			function write(ctx, lineHeight, text, where) {
+				ctx.font = ((lineHeight * 0.35)|0) + 'px sans-serif';
+  			ctx.fillText(text, where.x, where.y);
+			}
+
+			var tableRows = [
+				[ 'Name', 'Score', 'Date' ]
+			];
+
+			for (var i = 0; i < rand(10, 20); ++i) {
+				tableRows.push([ randString(), rand(100, 10000), randDate(new Date(2019, 0, 1), new Date()) ]);
+			}
+
+			// starts here
+			var canvas = document.getElementById('canvas');
+	    var ctx = canvas.getContext('2d');
+	    ctx.scale(1, 1);
+	    ctx.canvas.width = 600;
+	    ctx.canvas.height = 800;
+
+			var x = 5;
+			var y = 5;
+			var width = ((canvas.width / 100) * 98)|0;
+			var height = ((canvas.height / 100) * 70)|0;
+			var lineHeight = 30;
+			var numWidth = (width / 15)|0;
+			var cellWidth = ((width - numWidth) / 3)|0;
+			var vMove = (lineHeight * 0.6)|0;
+			var hMove = (cellWidth / 10)|0;
+
+			ctx.beginPath();
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = 'white';
+			ctx.fillStyle = 'white';
+
+			doLine(ctx, { x: x, y: y }, { x: x + width, y: y });
+
+			for (var row = 0; row < tableRows.length; ++row) {
+				var xx = x;
+				var yy = y + (row * lineHeight);
+
+				doLine(ctx, { x: xx, y: yy }, { x: xx, y: yy + lineHeight });
+				doLine(ctx, { x: xx + numWidth, y: yy }, { x: xx + numWidth, y: yy + lineHeight });
+				doLine(ctx, { x: xx + numWidth + cellWidth, y: yy }, { x: xx + numWidth + cellWidth, y: yy + lineHeight });
+				doLine(ctx, { x: xx + numWidth + cellWidth + cellWidth, y: yy }, { x: xx + numWidth + cellWidth + cellWidth, y: yy + lineHeight });
+				doLine(ctx, { x: xx + width, y: yy }, { x: xx + width, y: yy + lineHeight });
+				doLine(ctx, { x: xx, y: yy + lineHeight }, { x: xx + width, y: yy + lineHeight });
+
+				if (row > 0) {
+					write(ctx, lineHeight, row, { x: xx + hMove, y: yy + vMove });
+				}
+				write(ctx, lineHeight, tableRows[row][0], { x: xx + numWidth + hMove, y: yy + vMove });
+				write(ctx, lineHeight, tableRows[row][1], { x: xx + numWidth + cellWidth + hMove, y: yy + vMove });
+				write(ctx, lineHeight, tableRows[row][2], { x: xx + numWidth + cellWidth + cellWidth + hMove, y: yy + vMove });
+			}
+		</script>
+	</body>
+</html>
